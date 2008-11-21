@@ -1,0 +1,46 @@
+AssignBy
+========
+
+This plugin extends the ActiveRecord relations functionality and allows you to use
+virtual assignments for related units.
+
+
+Example
+=======
+
+Say you've got a user model which has a login field. And a message which belongs to user
+
+class User < ActiveRecord::Base
+  validates_presence_of :login
+end
+
+class Message < ActiveRecord::Base
+  belongs_to :user, :assign_by => :login
+end
+
+specifying the :assign_by => :login option, you create a virtual field 'user_login'
+and two methods for it setter and getter.
+
+class Message < ActiveRecord::Base
+  
+  def user_login
+    # .......
+  end
+
+  def user_login=(login)
+    # .......
+  end
+
+end
+
+Now you can use the new field on your forms, and when you put something in it.
+Something like
+
+Message.new :user_login => 'Santa'
+
+This will automatically search for a user with login 'Santa', if found the user
+will be assigned to the 'user' field, or if not found, there will be a an error
+assigned to the 'user_login' field telling that it can't find any relevant records.
+
+
+Copyright (c) 2008 [Nikolay V. Nemshilov aka St.], released under the MIT license
