@@ -62,7 +62,7 @@ module ActiveRecord::AssignBy
       # Checks if the associated model was assigned, by some defined field
       # or directly by a record
       #
-      def self.validates_assign_of(*attr_names)
+      def self.validates_assignment_of(*attr_names)
         return unless defined? @@__assign_by_virtual_fields_map
         
         options = attr_names.extract_options!

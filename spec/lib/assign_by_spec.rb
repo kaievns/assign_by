@@ -14,7 +14,7 @@ class Article < ActiveRecord::Base
   belongs_to :author, :class_name => "User", :assign_by => :login
   belongs_to :editor, :class_name => "User", :assign_by => :login
   
-  validates_assign_of :author, :editor
+  validates_assignment_of :author, :editor
 end
 
 describe ActiveRecord::AssignBy do 

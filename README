@@ -52,7 +52,7 @@ define your model like that
 class Message < ActiveRecord::Base
   belongs_to :user, :assign_by => :login
 
-  validates_assign_of :user
+  validates_assignment_of :user
 end
 
 then validation of the model will check if the related user was assigned as an
