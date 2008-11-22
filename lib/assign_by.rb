@@ -25,10 +25,11 @@ module ActiveRecord::AssignBy
           
           
           assign_by.each do |field|
+            field_name = "#{association_id}_#{field}"
             
             # defining new virtual getter
-            define_method "#{association_id}_#{field}" do
-              if cached_name = instance_variable_get("@#{association_id}_#{field}")
+            define_method field_name do
+              if cached_name = instance_variable_get("@#{field_name}")
                 cached_name
               elsif association = send(association_id)
                 association.send field
@@ -36,10 +37,19 @@ module ActiveRecord::AssignBy
             end
             
             # defining new virtual setter
-            define_method "#{association_id}_#{field}=" do |value|
+            define_method "#{field_name}=" do |value|
               send "#{association_id}=", klass.send("find_by_#{field}", value)
-              instance_variable_set("@#{association_id}_#{field}", value)
+              instance_variable_set("@#{field_name}", value)
             end
+            
+            # defining validation methods for the virtual fields
+            define_method "#{field_name}_validation_check" do
+              value = instance_variable_get("@#{field_name}")
+              unless value.blank?
+                self.errors.add("#{field_name}", 'is not found') unless send(association_id)
+              end
+            end
+            validate "#{field_name}_validation_check"
           end
         end
       end
