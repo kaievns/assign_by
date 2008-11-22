@@ -51,6 +51,42 @@ module ActiveRecord::AssignBy
             end
             validate "#{field_name}_validation_check"
           end
+          
+          # saving the virtual methods map
+          @@__assign_by_virtual_fields_map ||= {}
+          @@__assign_by_virtual_fields_map[association_id.to_sym] = assign_by
+        end
+      end
+      
+      #
+      # Checks if the associated model was assigned, by some defined field
+      # or directly by a record
+      #
+      def self.validates_assign_of(*attr_names)
+        return unless defined? @@__assign_by_virtual_fields_map
+        
+        options = attr_names.extract_options!
+
+        attr_names.each do |association_id|
+          fields = @@__assign_by_virtual_fields_map[association_id.to_sym]
+          
+          # checking the main association only if nothing of the virtual assignments was used
+          module_eval <<-end_eval
+            validates_presence_of association_id, options.merge(:if => proc{ |a| #{
+              fields.collect{ |field|
+                "a.#{association_id}_#{field}.nil?"
+              }.join(' and ')
+            }})
+          end_eval
+          
+          # checking virtual assignments emptyness if they were used 
+          fields.each do |field|
+            module_eval <<-end_eval
+              validates_presence_of "#{association_id}_#{field}", :if => proc{ |a|
+                !a.#{association_id}_#{field}.nil?
+              }
+            end_eval
+          end
         end
       end
     end

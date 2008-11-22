@@ -43,4 +43,21 @@ will be assigned to the 'user' field, or if not found, there will be a an error
 assigned to the 'user_login' field telling that it can't find any relevant records.
 
 
+Validation
+==========
+
+Additionally the plugin provides some flexible assignment validations. If you will
+define your model like that
+
+class Message < ActiveRecord::Base
+  belongs_to :user, :assign_by => :login
+
+  validates_assign_of :user
+end
+
+then validation of the model will check if the related user was assigned as an
+object or by a virtual assignment via the login field and generate appropriate
+error messages for both of the cases
+
+
 Copyright (c) 2008 [Nikolay V. Nemshilov aka St.], released under the MIT license

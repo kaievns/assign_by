@@ -20,9 +20,11 @@ ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => $db_
 # run mibrations
 require "#{dir}/db/migrate/create_users.rb"
 require "#{dir}/db/migrate/create_messages.rb"
+require "#{dir}/db/migrate/create_articles.rb"
 
 ActiveRecord::Migration.verbose = false
 
 CreateUsersTable.migrate(:up)
 CreateMessagesTable.migrate(:up)
+CreateArticlesTable.migrate(:up)
 

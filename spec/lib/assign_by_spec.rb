@@ -10,6 +10,13 @@ class Message < ActiveRecord::Base
   belongs_to :reader, :class_name => "User"
 end
 
+class Article < ActiveRecord::Base
+  belongs_to :author, :class_name => "User", :assign_by => :login
+  belongs_to :editor, :class_name => "User", :assign_by => :login
+  
+  validates_assign_of :author, :editor
+end
+
 describe ActiveRecord::AssignBy do 
   before :all do 
     User.destroy_all
@@ -119,6 +126,70 @@ describe ActiveRecord::AssignBy do
       @message.editor.should be_nil
       @message.should_not be_valid
       @message.errors.on(:editor_email).should_not be_nil
+    end
+  end
+  
+  describe "assign validation" do 
+    before :each do
+      @article = Article.new
+      @article.valid?
+    end
+    
+    it "should have an error on the 'author' field" do 
+      @article.errors.on(:author).should_not be_nil
+    end
+    
+    it "should have an error on the 'editor' field" do 
+      @article.errors.on(:editor).should_not be_nil
+    end
+    
+    it "should not have any errors on the 'author_login' field" do 
+      @article.errors.on(:author_login).should be_nil
+    end
+    
+    it "should not have any errors on the 'editor_login' field" do 
+      @article.errors.on(:editor_login).should be_nil
+    end
+    
+    describe "with error virtual values" do
+      before(:each) do
+        @article.author_login = ''
+        @article.editor_login = 'non existing login'
+        
+        @article.valid?
+      end
+      
+      it "should not have any errors on the 'author' field" do 
+        @article.errors.on(:author).should be_nil
+      end
+
+      it "should not have any errors on the 'editor' field" do
+        @article.errors.on(:editor).should be_nil
+      end
+      
+      it "should have error on the 'author_login' field" do
+        @article.errors.on(:author_login).should == "can't be blank"
+      end
+      
+      it "should have an error on the 'editor_login' field" do
+        @article.errors.on(:editor_login).should == "is not found"
+      end
+    end
+    
+    describe "correct values assignment" do 
+      before :each do 
+        User.delete_all
+        
+        @author = User.create :login => 'author'
+        @editor = User.create :login => 'editor'
+        
+        @article.author = @author
+        @article.editor_login = @editor.login
+      end
+      
+      it "should be valid" do 
+        @article.should be_valid
+      end
     end
   end
 end
