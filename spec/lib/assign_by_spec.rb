@@ -12,6 +12,8 @@ end
 
 describe ActiveRecord::AssignBy do 
   before :all do 
+    User.destroy_all
+    
     @user   = User.create :login => 'user',   :email => 'user@email'
     @author = User.create :login => 'author', :email => 'author@email'
     @editor = User.create :login => 'editor', :email => 'editor@email'
@@ -50,5 +52,43 @@ describe ActiveRecord::AssignBy do
     @message.author_login.should be_nil
     @message.editor_login.should be_nil
     @message.editor_email.should be_nil
+  end
+  
+  describe "user assignment" do 
+    before :each do 
+      @message.user = nil
+    end
+    
+    it "should be initially nil" do 
+      @message.user.should be_nil
+    end
+    
+    it "should assign the user by model" do 
+      @message.user = @user
+      @message.user.should == @user
+      @message.user_login.should == @user.login
+    end
+    
+    it "should assign user by his login" do 
+      @message.user_login = @author.login
+      @message.user.should == @author
+      @message.user_login.should == @author.login
+    end
+    
+    describe "by wrong string" do 
+      before :each do 
+        @message.user = @user
+        
+        @message.user_login = 'nonexisting login'
+      end
+      
+      it "should should nullify the user" do 
+        @message.user.should be_nil
+      end
+      
+      it "should return the 'nonexisting login' string as the user login" do 
+        @message.user_login.should == 'nonexisting login'
+      end
+    end
   end
 end
